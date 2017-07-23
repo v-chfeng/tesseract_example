@@ -1,17 +1,18 @@
 #include <iostream>
+#include <fstream>
 #include <memory>
 
 #include <allheaders.h> // leptonica main header for image io
 #include <baseapi.h> // tesseract main header
 
-int main(int argc, char *argv[])
+extern "C" __declspec (dllexport) int demomain(int argc, char* output, char *argv[])
 {
     if (argc == 1)
         return 1;
 
     tesseract::TessBaseAPI tess;
 
-    if (tess.Init("./tessdata", "eng"))
+    if (tess.Init("./tessdata", "chi_sim"))
     {
         std::cout << "OCRTesseract: Could not initialize tesseract." << std::endl;
         return 1;
@@ -35,6 +36,27 @@ int main(int argc, char *argv[])
 
     // get result and delete[] returned char* string
     std::cout << std::unique_ptr<char[]>(tess.GetUTF8Text()).get() << std::endl;
+
+	char* str = tess.GetUTF8Text();
+
+	std::ofstream out;
+	out.open(output, std::ios::out);
+	
+	out << "test write" << std::endl;
+	out << str;
+	out.close();
+
+	if (out.is_open())
+	{
+		out << str;
+		out.close();
+	}
+	else
+	{
+		std::cout << "can't open file" << output << std::endl;
+	}
+
+	output = tess.GetUTF8Text();
 
     // cleanup
     tess.Clear();
